@@ -8,7 +8,7 @@ app.get('/', async function (req, res) {
   res.send('OK');
 })
 
-app.get('/books.js', async function (req, res) {
+app.get('/books', async function (req, res) {
   let list = await books.createList();
   let json = JSON.stringify(list);
   res.send(json);

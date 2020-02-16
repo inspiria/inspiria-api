@@ -21,7 +21,7 @@ exports.createList = async function createList() {
     book["title"] = row.title;
     book["subtitle"] = row.subtitle;
     book["year"] = row.published_year;
-    book["cover_image"] = row.cover_image_lg;
+    book["coverImage"] = row.cover_image_lg;
     return book;
   });
   // con.end();
