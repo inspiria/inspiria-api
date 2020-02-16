@@ -8,8 +8,8 @@ const con = mysql.createConnection({
   database: 'books'
 });
 
-exports.createList = async function createList() {
-
+exports.getList = async function getList() {
+  
   const query = util.promisify(con.query).bind(con);
 
   con.connect((err) => { if (err) { console.log('Error connecting to DB'); } });
