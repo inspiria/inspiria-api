@@ -17,16 +17,26 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
 
   con.connect((err) => { if (err) { console.log('Error connecting to DB'); } });
 
-  const rows = await query(`SELECT chapter_id, book_id, title, language_id, short_name, order_number, text, text_processed, citation, section_header, show_number, section_headers FROM chapters WHERE book_id = ${bookId};`);
-
-  if (rows.length == 0) {
+  const bookRows = await query(`SELECT book_id, title, subtitle, published_year, cover_image_md FROM books WHERE book_id = ${bookId};`);
+  if (bookRows.length == 0) {
     throw "Book not found";
   }
-  
-  const chapters = rows.map(row => {
+
+  var book = {}
+  book["id"] = bookRows[0].book_id;
+  book["title"] = bookRows[0].title;
+  book["subtitle"] = bookRows[0].subtitle;
+  book["year"] = bookRows[0].published_year;
+  book["coverImageUrl"] = "https://edtechbooks.org/book_cover_images/" + bookRows[0].cover_image_md;
+
+  const chaptersRows = await query(`SELECT chapter_id, title, language_id, short_name, order_number, text, text_processed, citation, section_header, show_number, section_headers FROM chapters WHERE book_id = ${bookId};`);
+  if (chaptersRows.length == 0) {
+    throw "Book not found";
+  }
+
+  book["chapters"] = chaptersRows.map(row => {
     let chapter = {}
     chapter["id"] = row.chapter_id;
-    chapter["bookId"] = row.book_id;
     chapter["title"] = row.title;
     chapter["language"] = row.language_id;
     chapter["shortName"] = row.short_name;
@@ -40,22 +50,21 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     return chapter;
   });
 
-  chapters.sort(function(a, b) {
+  book["chapters"].sort(function (a, b) {
     if (a.order < b.order) { return -1; }
     if (a.order > b.order) { return 1; }
-
     if (a.short_name < b.short_name) { return -1; }
     if (a.short_name > b.short_name) { return 1; }
     return 0;
   });
-  return chapters;
+  return book;
 }
 
 async function exportBook(book, path) {
   let data = JSON.stringify(book);
   let filePath = `${path}/book.json`;
   let zipPath = `${path}/book.zip`;
-  
+
   fs.mkdirSync(path, { recursive: true });
   fs.writeFileSync(filePath, data);
 
