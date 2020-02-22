@@ -1,52 +1,49 @@
-const mysql = require('mysql');
-const util = require('util');
 const admZip = require('adm-zip');
 const fs = require('fs');
-const { promisify } = require('util');
-
-
-const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root1234',
-  database: 'books_full'
-});
+const db = require('./db');
+const books = require('./booksList');
+const util = require('util');
 
 exports.jsonBook = async function jsonBook(bookId, full = true) {
-  const query = util.promisify(con.query).bind(con);
+  const book = {};
+  const list = await books.get(bookId);
+  const info = list[0];
+  
 
-  con.connect((err) => { if (err) { console.log('Error connecting to DB'); } });
+  const q = `SELECT \
+  chapter_id,\
+  title,\
+  language_id,\
+  short_name,\
+  order_number,\
+  text,\
+  text_processed,\
+  citation,\
+  section_header,\
+  show_number,\
+  section_headers\
+  FROM chapters WHERE book_id = ${bookId};`
 
-  const bookRows = await query(`SELECT book_id, title, subtitle, published_year, cover_image_md FROM books WHERE book_id = ${bookId};`);
-  if (bookRows.length == 0) {
+  const chaptersRows = await db.query(q);
+
+  if (chaptersRows.length == 0 && info == undefined) {
     throw "Book not found";
   }
 
-  var book = {}
-  book["id"] = bookRows[0].book_id;
-  book["title"] = bookRows[0].title;
-  book["subtitle"] = bookRows[0].subtitle;
-  book["year"] = bookRows[0].published_year;
-  book["coverImageUrl"] = "https://edtechbooks.org/book_cover_images/" + bookRows[0].cover_image_md;
-
-  const chaptersRows = await query(`SELECT chapter_id, title, language_id, short_name, order_number, text, text_processed, citation, section_header, show_number, section_headers FROM chapters WHERE book_id = ${bookId};`);
-  if (chaptersRows.length == 0) {
-    throw "Book not found";
-  }
-
+  book["info"] = info;
   book["chapters"] = chaptersRows.map(row => {
     let chapter = {}
-    chapter["id"] = row.chapter_id;
-    chapter["title"] = row.title;
-    chapter["language"] = row.language_id;
-    chapter["shortName"] = row.short_name;
-    chapter["order"] = row.order_number;
-    chapter["citation"] = row.citation;
-    chapter["sectionHeader"] = row.section_header;
-    chapter["showNumber"] = row.show_number;
-    chapter["text"] = full ? row.text : "Text";
-    chapter["textProcessed"] = full ? row.text_processed : "Text processed";
-    chapter["sectionHeaders"] = row.section_headers;
+    chapter["id"]             = row.chapter_id;
+    chapter["title"]          = row.title;
+    chapter["language"]       = row.language_id;
+    chapter["shortName"]      = row.short_name;
+    chapter["order"]          = row.order_number;
+    chapter["citation"]       = row.citation;
+    chapter["sectionHeader"]  = row.section_header;
+    chapter["showNumber"]     = row.show_number;
+    chapter["text"]           = full ? row.text : undefined;
+    chapter["textProcessed"]  = full ? row.text_processed : undefined;
+    chapter["sectionHeaders"] = full ? row.section_headers : undefined;
     return chapter;
   });
 
@@ -70,7 +67,7 @@ async function exportBook(book, path) {
 
   var zip = new admZip();
   zip.addLocalFile(filePath)
-  let writeZip = promisify(zip.writeZip).bind(zip)
+  let writeZip = util.promisify(zip.writeZip).bind(zip)
   await writeZip(zipPath);
 
   return zipPath;

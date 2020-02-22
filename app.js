@@ -11,7 +11,7 @@ app.get('/', async function (req, res) {
 })
 
 app.get('/books', async function (req, res) {
-  let list = await books.getList();
+  let list = await books.get();
   res.json(list);
 })
 
