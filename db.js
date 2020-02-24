@@ -5,7 +5,7 @@ const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'root1234',
-  database: 'books_full'
+  database: 'books'
 });
 
 exports.query = async function query(q) {

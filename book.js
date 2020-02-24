@@ -9,7 +9,6 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   const list = await books.get(bookId);
   const info = list[0];
   
-
   const q = `SELECT \
   chapter_id,\
   title,\
