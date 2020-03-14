@@ -9,19 +9,9 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   const list = await books.get(bookId);
   const info = list[0];
   
-  const q = `SELECT \
-  chapter_id,\
-  title,\
-  language_id,\
-  short_name,\
-  order_number,\
-  text,\
-  text_processed,\
-  citation,\
-  section_header,\
-  show_number,\
-  section_headers\
-  FROM chapters WHERE book_id = ${bookId};`
+  //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
+  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text, citation, section_headers
+  FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
   const chaptersRows = await db.query(q);
 
@@ -32,27 +22,24 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   book["info"] = info;
   book["chapters"] = chaptersRows.map(row => {
     let chapter = {}
-    chapter["id"]             = row.chapter_id;
-    chapter["title"]          = row.title;
-    chapter["language"]       = row.language_id;
-    chapter["shortName"]      = row.short_name;
-    chapter["order"]          = row.order_number;
-    chapter["citation"]       = row.citation;
-    chapter["sectionHeader"]  = row.section_header;
-    chapter["showNumber"]     = row.show_number;
-    chapter["text"]           = full ? row.text : undefined;
-    chapter["textProcessed"]  = full ? row.text_processed : undefined;
-    chapter["sectionHeaders"] = full ? row.section_headers : undefined;
+    chapter["id"]                = row.chapter_id;
+    chapter["bookId"]           = row.book_id;
+    chapter["shortName"]         = row.short_name;
+    chapter["title"]             = row.title;
+    chapter["orderNumber"]       = row.order_number;
+    chapter["isSectionHeader"]   = Boolean(row.section_header);
+    chapter["showNumber"]        = Boolean(row.show_number);
+    chapter["showHeadings"]      = Boolean(row.show_headings);
+    chapter["lastUpdated"]       = row.last_updated;
+    chapter["parentId"]          = row.synchronize == 1 ? row.parent_id : null;
+    chapter["copyrightOverride"] = row.copyright_override === "" ? null : row.copyright_override;
+    chapter["language"]          = row.language_id;
+    chapter["citation"]          = full ? row.citation        : (row.citation == null        ? null : "citation goes here");
+    chapter["text"]              = full ? row.text            : (row.text == null            ? null : "text goes here");
+    chapter["sectionHeaders"]    = full ? row.section_headers : (row.section_headers == null ? null : "section_headers goes here");
     return chapter;
   });
 
-  book["chapters"].sort(function (a, b) {
-    if (a.order < b.order) { return -1; }
-    if (a.order > b.order) { return 1; }
-    if (a.short_name < b.short_name) { return -1; }
-    if (a.short_name > b.short_name) { return 1; }
-    return 0;
-  });
   return book;
 }
 
