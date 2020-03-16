@@ -79,7 +79,6 @@ async function sanitizeText(text, bookId, download) {
       await downloadImage(img.url, `./tmp/${bookId}/img/${img.name}`);
     }
   }
-  console.log(images);
 
   return result
 }
