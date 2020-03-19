@@ -36,7 +36,6 @@ app.get('/generate', async function (req, res) {
 
     list.forEach(element =>  {
       const id = element["id"];
-      console.log(id);
       try {
         result["download"].push(id);
         book.generateBook(id);

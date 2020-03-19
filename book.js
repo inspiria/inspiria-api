@@ -2,10 +2,12 @@ const admZip = require('adm-zip');
 const fs = require('fs');
 const filesize = require("filesize");
 const db = require('./db');
-const books = require('./booksList');
 const util = require('util');
 const sanitizeHtml = require('sanitize-html');
 const request = require('request');
+
+const books = require('./booksList');
+const authors = require('./authors');
 
 const books_path = `generated_books/`
 const images_path = `img/`
@@ -16,9 +18,15 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   const book = {};
   const list = await books.get(bookId);
   const info = list[0];
+  const author = await authors.getAuthors(bookId);
   
+  //add author pictures
+  var imagesToDownload = author.map(auth => {
+    return { "name": auth.pictureName, "url": auth.pictureUrl };
+  });
+
   //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
-  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text_processed, citation, section_headers
+  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text, citation, section_headers
   FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
   const chaptersRows = await db.query(q);
@@ -29,9 +37,14 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
 
   var i = 0;
   book["info"] = info;
+  book["authors"] = author;
   book["chapters"] = await Promise.all(chaptersRows.map(async row => {
     let chapter = {}
-    let text = await sanitizeText(row.text_processed, bookId, full);
+    let imagesAndText = await sanitizeText(row.text, bookId);
+    let text =  imagesAndText.text;
+
+    //add images from chapters
+    imagesToDownload = imagesToDownload.concat(imagesAndText.images)
 
     chapter["id"]                = row.chapter_id;
     chapter["bookId"]            = row.book_id;
@@ -48,21 +61,25 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     chapter["citation"]          = full ? row.citation        : (row.citation        == null ? null : "citation goes here");
     chapter["text"]              = full ? text                : (text                == null ? null : "text goes here");
     chapter["sectionHeaders"]    = full ? row.section_headers : (row.section_headers == null ? null : "section_headers goes here");
-    
-    if (full == false && i == 5) {
-      // chapter["text"] = row.text_processed;
-      chapter["tt"] = text;
-    }
-
-    i++;
 
     return chapter;
   }));
+  
+  if (full) {
+    //filter images
+    imagesToDownload = imagesToDownload.filter((obj, pos, arr) => {
+      return arr.map(i => `${i.name}-${i.url}`).indexOf(`${obj.name}-${obj.url}`) === pos;
+    });
+    //download
+    for (let img of imagesToDownload) {
+      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+    }
+  }
 
   return book;
 }
 
-async function sanitizeText(text, bookId, download) {
+async function sanitizeText(text, bookId) {
   var images = [];
   const sanitizeOptions = {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
@@ -80,13 +97,7 @@ async function sanitizeText(text, bookId, download) {
   };
 
   let result = sanitizeHtml(text, sanitizeOptions)
-  if (download) {
-    for (let img of images) {
-      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
-    }
-  }
-
-  return result
+  return { "text": result, "images": images }
 }
 
 async function downloadImage(uri, filename) {
@@ -136,7 +147,7 @@ exports.getBookStatus = function getBookStatus(bookId) {
     let info = fs.statSync(path)
     return {
       "size": filesize(info.size, {round: 0}),
-      "created": info.birthtime,
+      "updated": info.mtime.toLocaleString(),
     } 
   } catch (e) {
     return { "error: " : e.toString() }
