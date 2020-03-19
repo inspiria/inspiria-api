@@ -1,10 +1,16 @@
 const admZip = require('adm-zip');
 const fs = require('fs');
+const filesize = require("filesize");
 const db = require('./db');
 const books = require('./booksList');
 const util = require('util');
 const sanitizeHtml = require('sanitize-html');
 const request = require('request');
+
+const books_path = `generated_books/`
+const images_path = `img/`
+const book_file = `book.json`
+const book_zip_file = `book.zip`
 
 exports.jsonBook = async function jsonBook(bookId, full = true) {
   const book = {};
@@ -76,7 +82,7 @@ async function sanitizeText(text, bookId, download) {
   let result = sanitizeHtml(text, sanitizeOptions)
   if (download) {
     for (let img of images) {
-      await downloadImage(img.url, `./tmp/${bookId}/img/${img.name}`);
+      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
     }
   }
 
@@ -93,9 +99,9 @@ async function downloadImage(uri, filename) {
 
 async function exportBook(book, path) {
   let data = JSON.stringify(book);
-  let filePath = `${path}/book.json`;
-  let imagesPath = `${path}/img`;
-  let zipPath = `${path}/book.zip`;
+  let filePath = `${path}${book_file}`;
+  let imagesPath = `${path}${images_path}`;
+  let zipPath = `${path}${book_zip_file}`;
 
   fs.mkdirSync(path, { recursive: true });
   fs.writeFileSync(filePath, data);
@@ -109,12 +115,30 @@ async function exportBook(book, path) {
   return zipPath;
 }
 
-exports.get = async function get(bookId) {
-  let path = `./tmp/${bookId}`;
+exports.generateBook = async function generateBook(bookId) {
+  let path = `${books_path}${bookId}/`;
   fs.mkdirSync(path, { recursive: true });
-  fs.mkdirSync(`${path}/img`, { recursive: true });
+  fs.mkdirSync(`${path}${images_path}`, { recursive: true });
 
   let book = await this.jsonBook(bookId);
   let result = await exportBook(book, path);
   return result;
+}
+
+exports.getBook = function getBook(bookId) {
+  let path = `${books_path}${bookId}/${book_zip_file}`;
+  return path;
+}
+
+exports.getBookStatus = function getBookStatus(bookId) {
+  let path = `${books_path}${bookId}/${book_zip_file}`;
+  try {
+    let info = fs.statSync(path)
+    return {
+      "size": filesize(info.size, {round: 0}),
+      "created": info.birthtime,
+    } 
+  } catch (e) {
+    return { "error: " : e.toString() }
+  }
 }

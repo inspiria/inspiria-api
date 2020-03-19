@@ -1,6 +1,6 @@
 #ignore local resources
 _resources
-.tmp
+generated_books/
 
 # Logs
 logs
