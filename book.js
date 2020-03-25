@@ -36,6 +36,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   }
 
   var i = 0;
+  var sectionHeaderStarted = false;
   book["info"] = info;
   book["authors"] = author;
   book["chapters"] = await Promise.all(chaptersRows.map(async row => {
@@ -45,6 +46,10 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
 
     //add images from chapters
     imagesToDownload = imagesToDownload.concat(imagesAndText.images)
+    
+    var show_headings = row.show_headings;
+    if (row.section_header == 1) { sectionHeaderStarted = true; }
+    if (row.section_header != 1 && sectionHeaderStarted) { show_headings = 1 }
 
     chapter["id"]                = row.chapter_id;
     chapter["bookId"]            = row.book_id;
@@ -53,7 +58,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     chapter["orderNumber"]       = row.order_number;
     chapter["isSectionHeader"]   = Boolean(row.section_header);
     chapter["showNumber"]        = Boolean(row.show_number);
-    chapter["showHeadings"]      = Boolean(row.show_headings);
+    chapter["showHeadings"]      = Boolean(show_headings);
     chapter["lastUpdated"]       = row.last_updated;
     chapter["parentId"]          = row.synchronize == 1 ? row.parent_id : null;
     chapter["copyrightOverride"] = row.copyright_override === "" ? null : row.copyright_override;
