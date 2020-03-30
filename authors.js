@@ -13,7 +13,7 @@ exports.getAuthors = async function getAuthors(bookId) {
     author["nameSortable"] = row.name_sortable;
     author["degree"]       = row.degree;
     author["affiliation"]  = row.affiliation;
-    author["pictureUrl"]   = `https://edtechbooks.org/author_images/${row.bio_pic}`;
+    author["pictureUrl"]   = row.bio_pic !== null ? `https://edtechbooks.org/author_images/${row.bio_pic}` : null;
     author["pictureName"]  = row.bio_pic;
     author["bio"]          = row.bio;
     return author;
