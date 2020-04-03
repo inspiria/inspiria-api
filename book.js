@@ -30,7 +30,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     .filter(el => el != null);
 
   //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
-  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text, citation, section_headers
+  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text, text_processed, citation, section_headers
   FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
   const chaptersRows = await db.query(q);
@@ -67,9 +67,9 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     chapter["parentId"] = row.synchronize == 1 ? row.parent_id : null;
     chapter["copyrightOverride"] = row.copyright_override === "" ? null : row.copyright_override;
     chapter["language"] = row.language_id;
-    chapter["citation"]          = full ? row.citation        : (row.citation        == null ? null : "citation goes here");
-    chapter["text"]              = full ? text                : (text                == null ? null : "text goes here");
-    chapter["sectionHeaders"]    = full ? row.section_headers : (row.section_headers == null ? null : "section_headers goes here");
+    chapter["citation"] = row.citation;
+    chapter["text"] = row.text;
+    chapter["sectionHeaders"] = row.section_headers;
 
     return chapter;
   }));
