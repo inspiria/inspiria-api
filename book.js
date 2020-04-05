@@ -136,13 +136,14 @@ async function sanitizeText(text, bookId) {
 async function writeChapter(uri, content) {
   let header = `
   <!DOCTYPE html><html><head>
+  <meta charset="utf-8">
   <link rel="stylesheet" href="./bootstrap.min.css">
   <link rel="stylesheet" href="./jquery-ui.css">
   <link rel="stylesheet" href="./edtechbookshelf.css">
   </head><body><arcicle id="chapter-container" class="container px-3 px-sm-5 px-md-5 px-lg-7 px-xl-7">\n`
   let footer = `</arcicle></body></html>\n`
   let data = header + content + footer
-  fs.writeFileSync(uri, data);
+  fs.writeFileSync(uri, data, 'utf8');
 }
 
 async function downloadImage(uri, filename) {
