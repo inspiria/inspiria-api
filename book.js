@@ -86,9 +86,9 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
       return arr.map(i => `${i.name}-${i.url}`).indexOf(`${obj.name}-${obj.url}`) === pos;
     });
     //download
-    // for (let img of imagesToDownload) {
-    //   await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
-    // }
+    for (let img of imagesToDownload) {
+      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+    }
   }
 
   return book;
