@@ -9,10 +9,12 @@ const request = require('request');
 const books = require('./booksList');
 const authors = require('./authors');
 
-const books_path = `generated_books/`
-const images_path = `img/`
-const book_file = `book.json`
-const book_zip_file = `book.zip`
+const books_path = `generated_books/`;
+const images_path = `img/`;
+const chapters_path = `chapters/`;
+const book_file = `book.json`;
+const book_extra_files = `files/`;
+const book_zip_file = `book.zip`;
 
 exports.jsonBook = async function jsonBook(bookId, full = true) {
   const book = {};
@@ -45,7 +47,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
   book["authors"] = author;
   book["chapters"] = await Promise.all(chaptersRows.map(async row => {
     let chapter = {}
-    let imagesAndText = await sanitizeText(row.text, bookId);
+    let imagesAndText = await sanitizeText(row.text_processed, bookId);
     let text = imagesAndText.text;
 
     //add images from chapters
@@ -55,8 +57,14 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     if (row.section_header == 1) { sectionHeaderStarted = true; }
     if (row.section_header != 1 && sectionHeaderStarted) { show_headings = 1 }
 
+    //save text to html
+    let fileName = `${row.chapter_id}.html`;
+    let chapterPath = `${books_path}/${bookId}/${chapters_path}/${fileName}`
+    await writeChapter(chapterPath, text)
+
     chapter["id"] = row.chapter_id;
     chapter["bookId"] = row.book_id;
+    chapter["fileName"] = fileName;
     chapter["shortName"] = row.short_name;
     chapter["title"] = row.title;
     chapter["orderNumber"] = row.order_number;
@@ -68,8 +76,6 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     chapter["copyrightOverride"] = row.copyright_override === "" ? null : row.copyright_override;
     chapter["language"] = row.language_id;
     chapter["citation"] = row.citation;
-    chapter["text"] = row.text;
-    chapter["sectionHeaders"] = row.section_headers;
 
     return chapter;
   }));
@@ -80,9 +86,9 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
       return arr.map(i => `${i.name}-${i.url}`).indexOf(`${obj.name}-${obj.url}`) === pos;
     });
     //download
-    for (let img of imagesToDownload) {
-      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
-    }
+    // for (let img of imagesToDownload) {
+    //   await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+    // }
   }
 
   return book;
@@ -90,16 +96,34 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
 
 async function sanitizeText(text, bookId) {
   var images = [];
+
   const sanitizeOptions = {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figcaption', 'sup']),
+    allowedClasses: {
+      'div': ['callout', 'youtube-container', 'youtube-overlay', 'progress'],
+      'a': ['youtube-link', 'text-muted'],
+      'img': ['youtube', 'pull-left', 'centered'],
+      'table': ['table-striped'],
+    },
+    allowedAttributes : {
+      'td': ['style'],
+      'img': ['style', 'src'],
+      'a': ['href']
+    },
     transformTags: {
       'img': function (tagName, attribs) {
         let url = attribs.src;
-        var name =  new URL(url).pathname.split('/').pop();
+        var name = unescape(new URL(url).pathname.split('/').pop());
+        let youtubeId = attribs[`youtube-id`]
+        if (youtubeId != null) {
+          name = `${youtubeId}-${name}`
+        }
         images.push({ "name": name, "url": url })
+
+        let att = Object.assign({}, attribs, { src: name, style : "max-width: 90%;" })
         return {
           tagName: tagName,
-          attribs: { src: name }
+          attribs: att
         };
       }
     }
@@ -107,6 +131,18 @@ async function sanitizeText(text, bookId) {
 
   let result = sanitizeHtml(text, sanitizeOptions)
   return { "text": result, "images": images }
+}
+
+async function writeChapter(uri, content) {
+  let header = `
+  <!DOCTYPE html><html><head>
+  <link rel="stylesheet" href="./bootstrap.min.css">
+  <link rel="stylesheet" href="./jquery-ui.css">
+  <link rel="stylesheet" href="./edtechbookshelf.css">
+  </head><body><arcicle id="chapter-container" class="container px-3 px-sm-5 px-md-5 px-lg-7 px-xl-7">\n`
+  let footer = `</arcicle></body></html>\n`
+  let data = header + content + footer
+  fs.writeFileSync(uri, data);
 }
 
 async function downloadImage(uri, filename) {
@@ -121,14 +157,18 @@ async function exportBook(book, path) {
   let data = JSON.stringify(book);
   let filePath = `${path}${book_file}`;
   let imagesPath = `${path}${images_path}`;
+  let chaptersPath = `${path}${chapters_path}`;
   let zipPath = `${path}${book_zip_file}`;
+  let filesPath = `${book_extra_files}`;
 
-  fs.mkdirSync(path, { recursive: true });
   fs.writeFileSync(filePath, data);
 
   var zip = new admZip();
   zip.addLocalFile(filePath)
+  zip.addLocalFolder(filesPath)
   zip.addLocalFolder(imagesPath)
+  zip.addLocalFolder(chaptersPath)
+
   let writeZip = util.promisify(zip.writeZip).bind(zip)
   await writeZip(zipPath);
 
@@ -139,6 +179,7 @@ exports.generateBook = async function generateBook(bookId) {
   let path = `${books_path}${bookId}/`;
   fs.mkdirSync(path, { recursive: true });
   fs.mkdirSync(`${path}${images_path}`, { recursive: true });
+  fs.mkdirSync(`${path}${chapters_path}`, { recursive: true });
 
   let book = await this.jsonBook(bookId);
   let result = await exportBook(book, path);
