@@ -124,3 +124,46 @@ nav#footer a {
   filter: grayscale(0);
   opacity: 1;
 }
+
+div.progress {
+  display: block;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  z-index: 9999;
+  background-color: transparent
+}
+
+div.progress-bar {
+  height: 2px;
+  background-color: rgba(177, 246, 255, .8);
+  width: 0
+}
+
+div.references p {
+  padding-left: 2em;
+  text-indent: -2em;
+  overflow: auto
+}
+
+#chapter-container div.objectives h3 {
+  background-color: #6fbada
+}
+
+#chapter-container div.video h3 {
+  background-color: #6fbada
+}
+
+#chapter-container div.weblink h3 {
+  background-color: #6fbada
+}
+
+#chapter-container div.callout h3 {
+  background-color: #6fbada
+}
+
+#chapter-container div.challenges h3 {
+  background-color: #6fbada
+}
