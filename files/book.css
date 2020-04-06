@@ -1,355 +1,126 @@
-div.callout {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #212529;
-  text-align: left;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  box-sizing: border-box;
-  border-radius: 14px;
-  background-color: #fafafa;
-  border: 1px silver solid;
-  margin-top: 2em;
-  margin-bottom: 2em;
-  display: block;
-  padding: 20px 20px 10px 20px;
+html {
+  height: 100%;
 }
 
-div.callout h3 {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  color: #212529;
-  font-family: Roboto, Arial, san-serif;
-  box-sizing: border-box;
-  line-height: 1.2;
-  font-size: 1.4em;
-  font-weight: bold;
-  margin: -20px -20px 20px -20px;
-  padding: 10px 20px;
-  clear: both;
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-  background-color: #6fbada;
-  text-align: center;
+body {
+  background-color: white;
+  background-image: linear-gradient(#fff, #eee);
+  background-attachment: fixed;
+  height: 100%;
 }
 
-div.youtube-container {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #212529;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  box-sizing: border-box;
+.book-container-3d {
   position: relative;
-  cursor: pointer;
-  text-align: center;
+  display: inline-block;
+  width: 230px;
+  margin: 20px;
 }
 
-a.youtube-link {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  box-sizing: border-box;
-  color: #007bff;
-  text-decoration: none;
-  background-color: transparent;
-  display: block !important;
-  text-align: center !important;
-  margin-top: 0;
-  opacity: .6;
-  margin-bottom: 1em;
+.book-container {
+  position: relative;
+  display: inline-block;
+  width: 225px;
+  margin: 20px;
 }
 
-a small.text-muted {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  line-height: 1.5;
-  font-family: Roboto, Arial, san-serif;
-  text-align: center !important;
-  box-sizing: border-box;
-  font-size: 80%;
-  font-weight: 400;
-  color: #6c757d !important;
+.book-shadow {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-img.youtube {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #212529;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  cursor: pointer;
-  text-align: center;
-  box-sizing: border-box;
-  vertical-align: middle;
-  border-style: none;
+.book-container-rounded img.book-cover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+img.book-cover {
+  opacity: 1;
+  display: block;
+  width: 100%;
   height: auto;
-  margin-bottom: 1em;
-  max-width: 100%;
+  transition: .5s ease;
+  backface-visibility: hidden;
 }
 
-div.youtube-overlay {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #212529;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  cursor: pointer;
-  box-sizing: border-box;
+.middle {
   transition: .5s ease;
-  opacity: 0.4;
+  opacity: 0;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 6%;
+  left: 13%;
+  width: 74%;
   text-align: center;
 }
 
-table.table-striped {
-  -webkit-tap-highlight-color: transparent;
-  --blue: #007bff;
-  --indigo: #6610f2;
-  --purple: #6f42c1;
-  --pink: #e83e8c;
-  --red: #dc3545;
-  --orange: #fd7e14;
-  --yellow: #ffc107;
-  --green: #28a745;
-  --teal: #20c997;
-  --cyan: #17a2b8;
-  --white: #fff;
-  --gray: #6c757d;
-  --gray-dark: #343a40;
-  --primary: #007bff;
-  --secondary: #6c757d;
-  --success: #28a745;
-  --info: #17a2b8;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #343a40;
-  --breakpoint-xs: 0;
-  --breakpoint-sm: 576px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #212529;
-  text-align: left;
-  font-family: Roboto, Arial, san-serif;
-  font-size: 1.2em;
-  box-sizing: border-box;
-  border-collapse: collapse;
-  margin-left: auto;
-  margin-right: auto;
+.book-download-link {
+  transition: .5s ease;
+  position: absolute;
+  opacity: 0;
+  top: 2%;
+  right: 10%;
 }
 
-img.centered {
-  margin: 1em auto 1em auto;
+.middle .text {
+  font-weight: bold;
+  margin-bottom: .4em;
+}
+
+.middle a.btn {
+  margin-bottom: .4em;
+}
+
+.book-container:hover img.book-cover,
+.book-container-3d:hover img.book-cover,
+.book-container-rounded:hover img.book-cover {
+  filter: brightness(20%);
+}
+
+.my-books img:hover {
+  filter: brightness(60%);
+}
+
+.book-container:hover .middle,
+.book-container-3d:hover .middle,
+.book-container-rounded:hover .middle,
+.book-container-rounded:hover .book-download-link {
+  opacity: 1;
+}
+
+nav#footer a {
+  color: white;
+}
+
+.book-box {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 40px;
+}
+
+.navbar-brand img {
+  max-height: 30px;
+  margin-right: .8em;
+}
+
+#footer .navbar-nav {
+  float: none;
+  margin: 0 auto;
   display: block;
   text-align: center;
-  max-width: 100%;
+}
+
+#footer .navbar-nav>li {
+  display: inline-block;
+  float: none;
+}
+
+#footer a {
+  opacity: 0.5;
+}
+
+#university_logos a {
+  filter: grayscale(1);
+  opacity: .8;
+}
+
+#university_logos a:hover {
+  filter: grayscale(0);
+  opacity: 1;
 }

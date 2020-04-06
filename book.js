@@ -32,7 +32,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     .filter(el => el != null);
 
   //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
-  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text, text_processed, citation, section_headers
+  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text_processed, citation, section_headers
   FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
   const chaptersRows = await db.query(q);
@@ -98,18 +98,21 @@ async function sanitizeText(text, bookId) {
   var images = [];
 
   const sanitizeOptions = {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figcaption', 'sup']),
-    allowedClasses: {
-      'div': ['callout', 'youtube-container', 'youtube-overlay', 'progress'],
-      'a': ['youtube-link', 'text-muted'],
-      'img': ['youtube', 'pull-left', 'centered'],
-      'table': ['table-striped'],
-    },
-    allowedAttributes : {
-      'td': ['style'],
-      'img': ['style', 'src'],
-      'a': ['href']
-    },
+    // allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figcaption', 'sup']),
+    // allowedClasses: {
+    //   'div': ['callout', 'youtube-container', 'youtube-overlay', 'progress'],
+    //   'a': ['youtube-link', 'text-muted'],
+    //   'img': ['youtube', 'pull-left', 'centered'],
+    //   'table': ['table-striped'],
+    // },
+    // allowedAttributes : {
+    //   'td': ['style'],
+    //   'img': ['style', 'src'],
+    //   'a': ['href']
+    // },
+    allowedTags: false,
+    allowedClasses: false,
+    allowedAttributes : false,
     transformTags: {
       'img': function (tagName, attribs) {
         let url = attribs.src;
@@ -134,14 +137,8 @@ async function sanitizeText(text, bookId) {
 }
 
 async function writeChapter(uri, content) {
-  let header = `
-  <!DOCTYPE html><html><head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="./bootstrap.min.css">
-  <link rel="stylesheet" href="./jquery-ui.css">
-  <link rel="stylesheet" href="./edtechbookshelf.css">
-  </head><body><arcicle id="chapter-container" class="container px-3 px-sm-5 px-md-5 px-lg-7 px-xl-7">\n`
-  let footer = `</arcicle></body></html>\n`
+  let header = fs.readFileSync(`${book_extra_files}_header.html`, `utf8`);
+  let footer = fs.readFileSync(`${book_extra_files}_footer.html`, `utf8`);
   let data = header + content + footer
   fs.writeFileSync(uri, data, 'utf8');
 }
