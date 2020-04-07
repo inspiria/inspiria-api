@@ -87,7 +87,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     });
     //download
     for (let img of imagesToDownload) {
-      // await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
     }
   }
 
