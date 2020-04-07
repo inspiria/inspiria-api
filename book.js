@@ -87,7 +87,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     });
     //download
     for (let img of imagesToDownload) {
-      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+      // await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
     }
   }
 
@@ -98,21 +98,9 @@ async function sanitizeText(text, bookId) {
   var images = [];
 
   const sanitizeOptions = {
-    // allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figcaption', 'sup']),
-    // allowedClasses: {
-    //   'div': ['callout', 'youtube-container', 'youtube-overlay', 'progress'],
-    //   'a': ['youtube-link', 'text-muted'],
-    //   'img': ['youtube', 'pull-left', 'centered'],
-    //   'table': ['table-striped'],
-    // },
-    // allowedAttributes : {
-    //   'td': ['style'],
-    //   'img': ['style', 'src'],
-    //   'a': ['href']
-    // },
     allowedTags: false,
     allowedClasses: false,
-    allowedAttributes : false,
+    allowedAttributes: false,
     transformTags: {
       'img': function (tagName, attribs) {
         let url = attribs.src;
@@ -122,12 +110,27 @@ async function sanitizeText(text, bookId) {
           name = `${youtubeId}-${name}`
         }
         images.push({ "name": name, "url": url })
-
-        let att = Object.assign({}, attribs, { src: name, style : "max-width: 90%;" })
-        return {
-          tagName: tagName,
-          attribs: att
-        };
+        let att = Object.assign({}, attribs, { src: name, style: "max-width: 90%;" })
+        return { tagName: tagName, attribs: att };
+      },
+      'table': function (tagName, attribs) {
+        var style = 'width: 100%; display: block;overflow: scroll; ';
+        if (attribs.style != null) {
+          style = style + attribs.style;
+        }
+        attribs.style = style
+        return { tagName: tagName, attribs: attribs };
+      },
+      'div': function (tagName, attribs) {
+        if (attribs.class == 'youtube-container' && attribs['data-src'] != null) {
+          let link = attribs['data-src'];
+          // Object.assign(attribs, { "href": link, "style": "display:block" })
+          Object.assign(attribs, {"onclick":`javascript:window.open('${link}')`, "style":"cursor:pointer;-webkit-touch-callout: none;"})
+          delete attribs['data-src'];
+          // delete attribs['data-toggle'];
+          // return { tagName: "a", attribs: attribs };
+        }
+        return { tagName: tagName, attribs: attribs };
       }
     }
   };
