@@ -31,7 +31,9 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     })
     .filter(el => el != null);
 
+
   //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
+  //        'SELECT chapter_id, book_id, short_name, title, cardinality, order_number, section_header, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist, flight_mode FROM chapters WHERE book_id = ? ';
   const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text_processed, citation, section_headers
   FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
@@ -56,6 +58,25 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     var show_headings = row.show_headings;
     if (row.section_header == 1) { sectionHeaderStarted = true; }
     if (row.section_header != 1 && sectionHeaderStarted) { show_headings = 1 }
+
+    // if (row.section_header == 1) {
+    //   var output = '';
+    //   for (id in chaptersRows) {
+    //     let chapter_brief = chaptersRows[id];
+    //     // if (chapter_brief.cardinality > row.cardinality) {
+    //     if (chapter_brief.section_header == 1) break;
+    //     output += `<a class="list-group-item list-group-item-action" href="com.tech9.treader://chapter?bookId=${chapter_brief.book_id}&chapterId=${chapter_brief.chapter_id}">`;
+    //     if (chapter_brief.order_number != null) {
+    //       output += chapter_brief.order_number + '. ';
+    //     }
+    //     output += chapter_brief.title + '</a>';
+    //     // }
+    //   }
+    //   if (output != '') {
+    //     output = '<h2>Section Contents</h2><div class="list-group">' + output + '</div>'
+    //     text += output
+    //   }
+    // }
 
     //save text to html
     let fileName = `${row.chapter_id}.html`;
@@ -87,7 +108,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     });
     //download
     for (let img of imagesToDownload) {
-      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+      //await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
     }
   }
 
@@ -120,18 +141,19 @@ async function sanitizeText(text, bookId) {
         }
         attribs.style = style
         return { tagName: tagName, attribs: attribs };
-      },
-      'div': function (tagName, attribs) {
-        if (attribs.class == 'youtube-container' && attribs['data-src'] != null) {
-          let link = attribs['data-src'];
-          // Object.assign(attribs, { "href": link, "style": "display:block" })
-          Object.assign(attribs, {"onclick":`javascript:window.open('${link}')`, "style":"cursor:pointer;-webkit-touch-callout: none;"})
-          delete attribs['data-src'];
-          // delete attribs['data-toggle'];
-          // return { tagName: "a", attribs: attribs };
-        }
-        return { tagName: tagName, attribs: attribs };
       }
+      // },
+      // 'div': function (tagName, attribs) {
+      //   if (attribs.class == 'youtube-container' && attribs['data-src'] != null) {
+      //     let link = attribs['data-src'];
+      //     // Object.assign(attribs, { "href": link, "style": "display:block" })
+      //     Object.assign(attribs, { "onclick": `javascript:window.open('${link}')`, "style": "cursor:pointer;-webkit-touch-callout: none;" })
+      //     delete attribs['data-src'];
+      //     // delete attribs['data-toggle'];
+      //     // return { tagName: "a", attribs: attribs };
+      //   }
+      //   return { tagName: tagName, attribs: attribs };
+      // }
     }
   };
 
