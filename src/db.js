@@ -1,5 +1,8 @@
 const mysql = require('mysql');
 const util = require('util');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const con = mysql.createConnection({
   host: process.env.TREADER_API_MYSQL_HOST,
