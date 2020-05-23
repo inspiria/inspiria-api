@@ -30,10 +30,7 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
       return auth.pictureName != null ? { "name": auth.pictureName, "url": auth.pictureUrl } : null;
     })
     .filter(el => el != null);
-
-
-  //        `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist  FROM chapters WHERE book_id = ? '`
-  //        'SELECT chapter_id, book_id, short_name, title, cardinality, order_number, section_header, show_pdf, last_updated, copyright_override, published, synchronize, IF(pw="",0,1) AS pw_exists, IF(editor_notes="",0,1) AS editor_notes_exist, flight_mode FROM chapters WHERE book_id = ? ';
+  
   const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text_processed, citation, section_headers
   FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
 
