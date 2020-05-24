@@ -10,10 +10,14 @@ app.get('/', async function (req, res) {
   res.send('OK');
 })
 
-// app.get('/books', async function (req, res) {
-//   let list = await books.get();
-//   res.json(list);
-// })
+app.get('/books', async function (req, res) {
+  try {
+    let list = await books.getBooksList();
+    res.json(list);
+  } catch(e) {
+    return res.status(404).send(e);
+  }
+})
 
 // app.get('/book/:bookId', async function (req, res) {
 //   try {
@@ -28,7 +32,13 @@ app.get('/', async function (req, res) {
 
 //generate all the books
 app.get('/generate', async function (req, res) {
+  try {
+    await books.generate();
     let list = await books.getBooksList();
+    res.json(list);
+  } catch(e) {
+    return res.status(404).send(e);
+  }
     // let result = {
     //   "download": [],
     //   "failed": []
@@ -43,8 +53,6 @@ app.get('/generate', async function (req, res) {
     //     result["failed"].push({"id": id, "reason": e.toString()});
     //   }
     // });
-
-    return res.json(list);
 })
 
 app.get('/status', async function (req, res) {
