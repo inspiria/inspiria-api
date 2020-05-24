@@ -1,13 +1,9 @@
 const admZip = require('adm-zip');
 const fs = require('fs');
 const filesize = require("filesize");
-const db = require('./db');
 const util = require('util');
 const sanitizeHtml = require('sanitize-html');
 const request = require('request');
-
-const books = require('./booksList');
-const authors = require('./authors');
 
 const books_path = `generated_books/`;
 const images_path = `img/`;
@@ -16,65 +12,73 @@ const book_file = `book.json`;
 const book_extra_files = `files/`;
 const book_zip_file = `book.zip`;
 
-exports.jsonBook = async function jsonBook(bookId, full = true) {
-  const book = {};
-  const list = await books.get(bookId);
-  const info = list[0];
-  const author = await authors.getAuthors(bookId);
+exports.jsonBook = async function jsonBook(book_info, full = true) {
+  const requestSync = util.promisify(request);
+  let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.short_name}`);
+  if (result.statusCode !== 200) { throw "Failed to connect to edtechbooks.org API" }
+  var data = JSON.parse(result.body)["book"];
 
-  author.forEach(auth => { auth.pictureName = auth.pictureName !== null ? `${bookId}_author_${auth.pictureName}` : null });
+  const book = {};
+  const authors = Object.values(data.authors).concat(Object.values(data.shadow_authors));
+  const chapters = Object.values(data.chapter_briefs);
+
+  book.authors = authors.map(auth => {
+    const author = {};
+    author.id           = auth.author_id;
+    author.name         = auth.name;
+    author.nameSortable = auth.name_sortable;
+    author.degree       = auth.degree;
+    author.affiliation  = auth.affiliation;
+    author.pictureUrl   = auth.bio_pic !== null ? `https://edtechbooks.org/author_images/${auth.bio_pic}` : null;
+    author.pictureName  = auth.bio_pic !== null ? `${book_info.short_name}_author_${auth.bio_pic}` : null;
+    author.bio          = auth.bio;
+    return author;
+  });
 
   //add author pictures
-  var imagesToDownload = author
-    .map(auth => {
-      return auth.pictureName != null ? { "name": auth.pictureName, "url": auth.pictureUrl } : null;
-    })
-    .filter(el => el != null);
+  var imagesToDownload = book.authors.map(auth => {
+    return auth.pictureName != null ? { "name": auth.pictureName, "url": auth.pictureUrl } : null;
+  })
+  .filter(el => el != null);
+
   
-  const q = `SELECT chapter_id, book_id, short_name, title, order_number, section_header, show_number, show_headings, last_updated, copyright_override, published, synchronize, parent_id, language_id, text_processed, citation, section_headers
-  FROM chapters WHERE book_id = ${bookId} AND published = 1 ORDER BY order_number ASC, section_header DESC, title ASC`;
-
-  const chaptersRows = await db.query(q);
-
-  if (chaptersRows.length == 0 && info == undefined) {
-    throw "Book not found";
-  }
-
   var i = 0;
-  var sectionHeaderStarted = false;
-  book["info"] = info;
-  book["authors"] = author;
-  book["chapters"] = await Promise.all(chaptersRows.map(async row => {
+  // var sectionHeaderStarted = false;
+  book.info = book_info;
+  book.chapters = await Promise.all(chapters.map(async row => {
+    let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.short_name}&chapter=${row.short_name}`);
+    if (result.statusCode !== 200) { return null };
+    let rowData = JSON.parse(result.body)["chapter"];
     let chapter = {}
-    let imagesAndText = await sanitizeText(row.text_processed, bookId);
+    let imagesAndText = await sanitizeText(rowData.text_processed);
     let text = imagesAndText.text;
 
     //add images from chapters
     imagesToDownload = imagesToDownload.concat(imagesAndText.images)
 
-    var show_headings = row.show_headings;
-    if (row.section_header == 1) { sectionHeaderStarted = true; }
-    if (row.section_header != 1 && sectionHeaderStarted) { show_headings = 1 }
-
     //save text to html
     let fileName = `${row.chapter_id}.html`;
-    let chapterPath = `${books_path}/${bookId}/${chapters_path}/${fileName}`
+    let chapterPath = `${books_path}/${book_info.id}/${chapters_path}/${fileName}`
     await writeChapter(chapterPath, text)
 
-    chapter["id"] = row.chapter_id;
-    chapter["bookId"] = row.book_id;
-    chapter["fileName"] = fileName;
-    chapter["shortName"] = row.short_name;
-    chapter["title"] = row.title;
-    chapter["orderNumber"] = row.order_number;
-    chapter["isSectionHeader"] = Boolean(row.section_header);
-    chapter["showNumber"] = Boolean(row.show_number);
-    chapter["showHeadings"] = Boolean(show_headings);
-    chapter["lastUpdated"] = row.last_updated;
-    chapter["parentId"] = row.synchronize == 1 ? row.parent_id : null;
-    chapter["copyrightOverride"] = row.copyright_override === "" ? null : row.copyright_override;
-    chapter["language"] = row.language_id;
-    chapter["citation"] = row.citation;
+    // var show_headings = row.show_headings;
+    // if (row.section_header == 1) { sectionHeaderStarted = true; }
+    // if (row.section_header != 1 && sectionHeaderStarted) { show_headings = 1 }
+
+    chapter.id = row.chapter_id;
+    chapter.bookId = row.book_id;
+    chapter.fileName = fileName;
+    chapter.shortName = row.short_name;
+    chapter.title = row.title;
+    chapter.orderNumber = row.order_number;
+    chapter.isSectionHeader = false;//Boolean(row.section_header);
+    chapter.showNumber = false;//Boolean(row.show_number);
+    chapter.showHeadings = false;//Boolean(show_headings);
+    chapter.lastUpdated = row.last_updated;
+    chapter.parentId = parseInt(rowData.parent_id);
+    chapter.copyrightOverride = null;//row.copyright_override === "" ? null : row.copyright_override;
+    chapter.language = row.language_id;
+    chapter.citation = row.citation;
 
     return chapter;
   }));
@@ -86,14 +90,14 @@ exports.jsonBook = async function jsonBook(bookId, full = true) {
     });
     //download
     for (let img of imagesToDownload) {
-      await downloadImage(img.url, `${books_path}/${bookId}/${images_path}/${img.name}`);
+      await downloadImage(img.url, `${books_path}/${book_info.id}/${images_path}/${img.name}`);
     }
   }
 
   return book;
 }
 
-async function sanitizeText(text, bookId) {
+async function sanitizeText(text) {
   var images = [];
 
   const sanitizeOptions = {
@@ -138,7 +142,11 @@ async function downloadImage(uri, filename) {
   const requestSync = util.promisify(request);
   let result = await requestSync(uri, { encoding: 'binary' });
   if (result.statusCode == 200) {
-    fs.writeFileSync(filename, result.body, 'binary');
+    try {
+      fs.writeFileSync(filename, result.body, 'binary');
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 
@@ -164,13 +172,13 @@ async function exportBook(book, path) {
   return zipPath;
 }
 
-exports.generateBook = async function generateBook(bookId) {
-  let path = `${books_path}${bookId}/`;
+exports.generateBook = async function generateBook(book_info) {
+  let path = `${books_path}${book_info.id}/`;
   fs.mkdirSync(path, { recursive: true });
   fs.mkdirSync(`${path}${images_path}`, { recursive: true });
   fs.mkdirSync(`${path}${chapters_path}`, { recursive: true });
 
-  let book = await this.jsonBook(bookId);
+  let book = await this.jsonBook(book_info);
   let result = await exportBook(book, path);
   return result;
 }
