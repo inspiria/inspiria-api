@@ -7,7 +7,7 @@ const books_file = `${books_path}books_list.json`;
 
 exports.generate = async function generate() {
   const requestSync = util.promisify(request);
-  let result = await requestSync(`https://edtechbooks.org/api.php?action=search_books`);
+  let result = await requestSync(`https://edtechbooks.org/api.php?action=search_books&limit=200`);
   if (result.statusCode != 200) { throw "Failed to connect to edtechbooks.org API" }
   let data = Object.values(JSON.parse(result.body)["books"]);
   let list = await Promise.all(data.map(async row => {
