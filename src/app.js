@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const books = require('./booksList');
-const book = require('./book');
+const books = require('./etb_books');
+const book = require('./etb_book');
 
 const app = express();
 const port = 8080;
@@ -11,8 +11,12 @@ app.get('/', async function (req, res) {
 })
 
 app.get('/books', async function (req, res) {
-  let list = await books.get();
-  res.json(list);
+  try {
+    let list = await books.getBooksList();
+    res.json(list);
+  } catch (e) {
+    return res.status(404).send(e);
+  }
 })
 
 app.get('/book/:bookId', async function (req, res) {
@@ -21,36 +25,36 @@ app.get('/book/:bookId', async function (req, res) {
     const bookPath = book.getBook(id);
     let filePath = path.join(__dirname, bookPath);
     return res.sendFile(filePath);
-  } catch(e) {
+  } catch (e) {
     return res.status(404).send(e);
   }
 })
 
 //generate all the books
 app.get('/generate', async function (req, res) {
-    let list = await books.get();
-    let result = {
-      "download": [],
-      "failed": []
-    };
-
-    list.forEach(element =>  {
-      const id = element["id"];
+  try {
+    let result = { "download": [], "failed": [] };
+    await books.generate();
+    let list = await books.getBooksList();
+    list.forEach(element => {
       try {
-        result["download"].push(id);
-        book.generateBook(id);
-      } catch(e) {
-        result["failed"].push({"id": id, "reason": e.toString()});
+        result.download.push(element.id);
+        book.generateBook(element);
+      } catch (e) {
+        result.failed.push({ "id": element.id, "reason": e.toString() });
       }
     });
 
-    return res.json(result);
+    res.json(result);
+  } catch (e) {
+    return res.status(404).send(e);
+  }
 })
 
 app.get('/status', async function (req, res) {
-  let list = await books.get();
+  let list = await books.getBooksList();
   var result = [];
-  list.forEach(element =>  {
+  list.forEach(element => {
     const id = element["id"];
     const title = element["title"];
     const status = book.getBookStatus(id);
@@ -62,17 +66,6 @@ app.get('/status', async function (req, res) {
   });
 
   return res.json(result);
-})
-
-//for testing purposes only
-app.get('/book-json/:bookId', async function (req, res) {
-  try {
-    const id = req.params.bookId;
-    const result = await book.jsonBook(id, false);
-    return res.json(result);
-  } catch(e) {
-    return res.status(404).send(e);
-  }
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
