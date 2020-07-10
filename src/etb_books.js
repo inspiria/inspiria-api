@@ -15,7 +15,7 @@ exports.generate = async function generate() {
     book.id = row.book_id;
     book.title = row.title;
     book.subtitle = row.subtitle;
-    book.short_name = row.short_name;
+    book.shortName = row.short_name;
     book.version = `${row.major_version}.` + `${row.minor_version}`
     book.coverImageUrl = "https://edtechbooks.org/book_cover_images/" + row.cover_image_md;
     return book;

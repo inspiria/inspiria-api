@@ -14,7 +14,7 @@ const book_zip_file = `book.zip`;
 
 exports.jsonBook = async function jsonBook(book_info, full = true) {
   const requestSync = util.promisify(request);
-  let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.short_name}`);
+  let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.shortName}`);
   if (result.statusCode !== 200) { throw "Failed to connect to edtechbooks.org API" }
   var data = JSON.parse(result.body)["book"];
 
@@ -30,7 +30,7 @@ exports.jsonBook = async function jsonBook(book_info, full = true) {
     author.degree       = auth.degree;
     author.affiliation  = auth.affiliation;
     author.pictureUrl   = auth.bio_pic !== null ? `https://edtechbooks.org/author_images/${auth.bio_pic}` : null;
-    author.pictureName  = auth.bio_pic !== null ? `${book_info.short_name}_author_${auth.bio_pic}` : null;
+    author.pictureName  = auth.bio_pic !== null ? `${book_info.shortName}_author_${auth.bio_pic}` : null;
     author.bio          = auth.bio;
     return author;
   });
@@ -46,7 +46,7 @@ exports.jsonBook = async function jsonBook(book_info, full = true) {
   // var sectionHeaderStarted = false;
   book.info = book_info;
   book.chapters = await Promise.all(chapters.map(async row => {
-    let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.short_name}&chapter=${row.short_name}`);
+    let result = await requestSync(`https://edtechbooks.org/api.php?book=${book_info.shortName}&chapter=${row.short_name}`);
     if (result.statusCode !== 200) { return null };
     let rowData = JSON.parse(result.body)["chapter"];
     let chapter = {}
